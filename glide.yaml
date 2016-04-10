@@ -1,0 +1,6 @@
+package: ""
+import:
+- package: github.com/hyperboloide/dispatch
+- package: github.com/Sirupsen/logrus
+- package: github.com/go-gomail/gomail
+- package: github.com/russross/blackfriday

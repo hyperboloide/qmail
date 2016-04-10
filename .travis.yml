@@ -1,0 +1,16 @@
+install:
+  - go get github.com/hyperboloide/dispatch
+  - go get github.com/Sirupsen/logrus
+  - go get github.com/go-gomail/gomail
+  - go get github.com/russross/blackfriday
+  - go get github.com/onsi/ginkgo/ginkgo
+  - go get github.com/onsi/gomega
+
+script: go test -race
+
+language: go
+
+go:
+  - 1.5
+  - 1.6
+  - tip

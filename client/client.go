@@ -3,7 +3,7 @@ package client
 import (
 	"encoding/json"
 
-	"github.com/fdelbos/dispatch"
+	"github.com/hyperboloide/dispatch"
 )
 
 // Mailer sends a mail to the queue
