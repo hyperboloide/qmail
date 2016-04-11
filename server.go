@@ -23,12 +23,12 @@ type SMTPConf struct {
 // Mailer reads mails from the queue and send message to smtp
 type Mailer struct {
 	SMTP      SMTPConf
-	Queue     dispatch.Queue
+	Queue     dispatch.PersistantQueue
 	Sender    string
 	Templates *template.Template
 }
 
-// Listenner is call by the Listen polling function of the queue when a
+// Listenner is called by the Listen polling function of the queue when a
 // message is available
 func (m Mailer) Listenner(buff []byte) error {
 	email := &client.Mail{}
@@ -37,14 +37,13 @@ func (m Mailer) Listenner(buff []byte) error {
 	}
 
 	textBuff := &bytes.Buffer{}
-
 	tmplName := fmt.Sprintf("%s.md", email.Template)
+
 	if t := m.Templates.Lookup(tmplName); t == nil {
 		return fmt.Errorf("template '%s' not found", tmplName)
 	} else if err := t.Execute(textBuff, email.Data); err != nil {
 		return err
 	}
-
 	html := blackfriday.MarkdownCommon(textBuff.Bytes())
 
 	messages := []*gomail.Message{}

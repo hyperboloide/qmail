@@ -25,3 +25,4 @@ _testmain.go
 qmail
 vendor
 glide.lock
+env.sh

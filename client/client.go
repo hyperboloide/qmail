@@ -28,7 +28,7 @@ func New(name, connecion string) (*Mailer, error) {
 
 // Send a message
 func (m Mailer) Send(msg Mail) error {
-	buff, err := json.Marshal(&msg)
+	buff, err := json.Marshal(msg)
 	if err != nil {
 		return err
 	}

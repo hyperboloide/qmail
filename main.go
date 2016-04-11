@@ -10,10 +10,16 @@ import (
 )
 
 var (
-	mailer *Mailer
+	// MainMailer connect to the queue and handle messages
+	MainMailer *Mailer
 )
 
-func configure() {
+// Configure the application from environement
+func Configure() {
+	log.SetFormatter(&log.TextFormatter{
+		DisableColors: true,
+	})
+
 	queue, err := dispatch.NewAMQPQueue(
 		os.Getenv("QUEUE_NAME"),
 		os.Getenv("QUEUE_HOST"))
@@ -31,7 +37,7 @@ func configure() {
 		log.Fatal(err)
 	}
 
-	mailer = &Mailer{
+	MainMailer = &Mailer{
 		SMTP: SMTPConf{
 			Host:     os.Getenv("SMTP_HOST"),
 			Port:     smtpPort,
@@ -45,9 +51,9 @@ func configure() {
 }
 
 func main() {
-	configure()
+	Configure()
 
-	if err := mailer.Queue.ListenBytes(mailer.Listenner); err != nil {
+	if err := MainMailer.Queue.ListenBytes(MainMailer.Listenner); err != nil {
 		log.Fatal(err)
 	}
 }
