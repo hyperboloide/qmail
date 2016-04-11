@@ -19,9 +19,7 @@ import "github.com/hyperboloide/qmail/client"
 Then connect to the queue and send an email:
 
 ```
-mailer, err := client.New(
-	os.Getenv("QUEUE_NAME"),
-	os.Getenv("QUEUE_HOST"))
+mailer, err := client.New("mails", "amqp://guest:guest@rabbitmq:5672/")
 
 if err != nil {
 	log.Fatal(err)
@@ -32,7 +30,7 @@ email := client.Mail{
 	Subject:  "test",
 	Template: "example_template",
 	Data:     map[string]string{"User": "test user"},
-	Files:    []string{"./some_file.txt"},
+	Files:    []string{"/myfiles/some_file.txt"},
 }
 
 if err := mailer.Send(email); err != nil {
@@ -49,15 +47,16 @@ The server is available as a Docker container
 docker pull hyperboloide/qmail
 ```
 
-All configuration options are passed as environement variables:
+All configuration options are passed as environment variables:
 
 ```
 docker run \
 	-v ~/templates:/templates \
+    -v ~/myfiles:/myfiles \
 	-link rabbitmq:rabbitmq \
 	-e TEMPLATES=/templates/*.md \
 	-e QUEUE_NAME=mails \
-	-e QUEUE_HOST=rabbitmq \
+	-e QUEUE_HOST=amqp://guest:guest@rabbitmq:5672/ \
 	-e SMTP_HOST=smtp.example.com \
 	-e SMTP_PORT=465 \
 	-e SMTP_USER=user@example.com \
@@ -65,3 +64,6 @@ docker run \
 	-e SENDER="Example User <user@example.com>" \
 	hyperboloide/qmail
 ```
+
+Note that if you want to send files you need to mount them in a Docker
+volume (here the volume `myfiles`).
