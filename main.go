@@ -53,6 +53,8 @@ func Configure() {
 func main() {
 	Configure()
 
+	log.WithField("queue", os.Getenv("QUEUE_NAME")).Info("qmail started")
+
 	if err := MainMailer.Queue.ListenBytes(MainMailer.Listenner); err != nil {
 		log.Fatal(err)
 	}
