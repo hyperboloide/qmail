@@ -1,9 +1,11 @@
 package main
 
 import (
+	html "html/template"
+	"io/ioutil"
 	"os"
 	"strconv"
-	"text/template"
+	text "text/template"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hyperboloide/dispatch"
@@ -13,6 +15,12 @@ var (
 	// MainMailer connect to the queue and handle messages
 	MainMailer *Mailer
 )
+
+const defaultBody = `
+<!doctype html>
+<html>
+  <body>{{ . }}</body>
+</html>`
 
 // Configure the application from environement
 func Configure() {
@@ -32,7 +40,8 @@ func Configure() {
 		log.Fatal(err)
 	}
 
-	tmpls, err := template.ParseGlob(os.Getenv("TEMPLATES"))
+	log.WithField("path", os.Getenv("TEMPLATES")).Info("Loading templates")
+	tmpls, err := text.ParseGlob(os.Getenv("TEMPLATES"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,6 +57,19 @@ func Configure() {
 		Sender:    os.Getenv("SENDER"),
 		Templates: tmpls,
 	}
+
+	if os.Getenv("HTML_BODY") == "" {
+		log.Info("No html body set, using default body")
+		if MainMailer.Body, err = html.New("body").Parse(defaultBody); err != nil {
+			log.Fatal(err)
+		}
+	} else if content, err := ioutil.ReadFile(os.Getenv("HTML_BODY")); err != nil {
+		log.Fatal(err)
+	} else if MainMailer.Body, err = html.New("body").Parse(string(content[:])); err != nil {
+		log.Fatal(err)
+	} else {
+		log.WithField("path", os.Getenv("HTML_BODY")).Info("HTML body provided")
+	}
 }
 
 func main() {
@@ -56,6 +78,6 @@ func main() {
 	log.WithField("queue", os.Getenv("QUEUE_NAME")).Info("qmail started")
 
 	if err := MainMailer.Queue.ListenBytes(MainMailer.Listenner); err != nil {
-		log.Fatal(err)
+		log.Fatal("Program failed, exiting.")
 	}
 }
